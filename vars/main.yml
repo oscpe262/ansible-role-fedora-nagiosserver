@@ -1,0 +1,4 @@
+## roles/ansible-role-fedora-nagiosserver/vars/main.yml
+# vim:ft=ansible:
+---
+...

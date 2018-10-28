@@ -1,0 +1,24 @@
+## roles/ansible-role-fedora-nagiosserver/handlers/main.yml
+# vim:ft=ansible:
+---
+- name: restart httpd
+  become: yes
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+
+- name: restart nagios
+  become: yes
+  service:
+    name: nagios
+    state: restarted
+    enabled: yes
+
+- name: restart firewalld
+  become: yes
+  service:
+    name: firewalld
+    state: reloaded
+    enabled: yes
+...

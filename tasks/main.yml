@@ -1,0 +1,55 @@
+## roles/ansible-role-fedora-nagiosserver/tasks/main.yml
+# vim:ft=ansible:
+---
+- assert:
+    that: "'Fedora' in ansible_distribution"
+    msg: "Only Fedora is supported at this stage"
+
+- name: Install Nagios Core packages
+  become: yes
+  package:
+    name: '{{ item }}'
+    state: present
+  with_flattened:
+    - nagios
+    - nagios-plugins-all
+    - python-passlib
+  notify:
+    - restart httpd
+    - restart nagios
+
+- name: Create rw-dir (https://bugzilla.redhat.com/show_bug.cgi?id=1291718)
+  become: yes
+  file:
+    path: /var/log/nagios/rw
+    owner: nagios 
+    group: nagios
+    mode: 0700
+    state: directory
+  notify:
+    - restart nagios
+
+- name: Manage credentials
+  become: yes
+  htpasswd:
+    path: /etc/nagios/passwd
+    name: nagiosadmin
+    password: '{{ nagios_password }}'
+    owner: root
+    group: apache
+    crypt_scheme: 'md5_crypt'
+  notify:
+    - restart httpd
+    - restart nagios
+
+# TODO: Workaround to allow 28+ when ansible_python_interpreter is py3
+#- name: Manage firewalld (Fedora 26 and 27 as firewalld module requires python2 firewalld bindings)
+#  become: yes
+#  firewalld:
+#    service: http
+#    permanent: true
+#    state: enabled
+#  when: "ansible_distribution_major_version|int < 28"
+#  notify:
+#    - restart firewalld
+...
